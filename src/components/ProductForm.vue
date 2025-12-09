@@ -51,7 +51,7 @@ const handleSubmit = () => {
 
       <div>
         <div class="flex items-center justify-between">
-          <label for="productPrice" class="block text-sm/6 font-medium text-gray-900">Password</label>
+          <label for="productPrice" class="block text-sm/6 font-medium text-gray-900">Precio del Producto</label>
         </div>
         <div class="mt-2">
           <input 
