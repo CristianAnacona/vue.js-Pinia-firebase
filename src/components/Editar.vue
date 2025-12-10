@@ -9,6 +9,8 @@ const databaseStore = useDatabaseStore();
 
 const productName = ref('');
 const productPrice = ref('');
+const imagenUrl = ref('');
+
 const productId = computed(() => route.params.id);
 const isEditing = computed(() => productId.value && productId.value !== 'nuevo');
 
@@ -35,7 +37,8 @@ const handleSubmit = async () => {
     if (isEditing.value) {
       await databaseStore.updateProduct(productId.value, {
         nombre: productName.value,
-        valor: parseFloat(productPrice.value)
+        valor: parseFloat(productPrice.value),
+        imagenUrl: imagenUrl.value
       });
       alert('Producto actualizado exitosamente');
     } else {
@@ -94,10 +97,37 @@ const handleSubmit = async () => {
             </div>
           </div>
 
+           <!-- Select para elegir imagen -->
+      <div>
+        <label for="imagen" class="block text-sm/6 font-medium text-gray-900">Selecciona una imagen</label>
+        <div class="mt-2">
+          <select 
+            id="imagen"
+            v-model="imagenUrl" 
+            required
+            class="block w-full rounded-md 
+                  border-0 py-1.5 text-gray-900 
+                  shadow-sm ring-1 ring-inset ring-gray-500 
+                  placeholder:text-gray-400 
+                  focus:ring-2 focus:ring-inset focus:ring-indigo-600 
+                  sm:text-sm sm:leading-6">
+            <option value="">-- Selecciona una imagen --</option>
+            <option value="/productos/ropa-deportiva.jpeg">Conjunto</option>
+            <option value="/productos/medias.jpeg">Medias</option>
+            <option value="/productos/pijama.jpeg">Pijama</option>
+            <option value="/productos/camiseta.jpeg">Camiseta</option>
+            <option value="/productos/tangas.jpeg">Tangas</option>
+          </select>
+        </div>
+      </div>
+
+
           <div>
             <button 
               type="submit"
-              class="flex w-full justify-center rounded-md bg-indigo-500 px-3 py-1.5 text-sm/6 font-semibold text-white hover:bg-indigo-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500">
+              class="flex w-full justify-center rounded-md bg-indigo-500 px-3 py-1.5 text-sm/6 font-semibold
+               text-white hover:bg-indigo-400 focus-visible:outline-2 focus-visible:outline-offset-2
+                focus-visible:outline-indigo-500">
               {{ isEditing ? 'Actualizar Producto' : 'Agregar Producto' }}
             </button>
           </div>

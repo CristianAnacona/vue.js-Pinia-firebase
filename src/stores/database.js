@@ -1,18 +1,19 @@
 import { addDoc, collection, deleteDoc, doc, getDocs, query, updateDoc } from 'firebase/firestore/lite'
-import {defineStore} from 'pinia'
+import { defineStore } from 'pinia'
 import { db } from '../../firebasdeConfig'
 import { ref } from 'vue'
 
 export const useDatabaseStore = defineStore('database', () => {
     const documents = ref([]);
     const loadingDoc = ref(false);
+
     //metodo para obtener los productos
     const getProducts = async () => {
         loadingDoc.value = true
         try {
-           const q = query  (collection(db, 'productos'))
+           const q = query(collection(db, 'productos'))
            const querySnapshot = await getDocs(q)
-           documents.value = []//limpiar
+           documents.value = []
            querySnapshot.forEach((doc) => {
            documents.value.push({
                id: doc.id,
@@ -22,18 +23,20 @@ export const useDatabaseStore = defineStore('database', () => {
            console.log(documents.value)
         } catch (error) {
            console.log(error) 
-        }finally {
+        } finally {
             loadingDoc.value = false
         }
     }
+
     //metodo para agregar un producto
     const addProduct = async (product) => {
         try {
             const objectDoc = {
                 nombre: product.nombre,
-                valor: product.valor
+                valor: product.valor,
+                imagenUrl: product.imagenUrl
             }
-            const docRef =await addDoc(collection(db, 'productos'), objectDoc)
+            const docRef = await addDoc(collection(db, 'productos'), objectDoc)
             documents.value.push({
                 ...objectDoc,
                 id: docRef.id
@@ -60,9 +63,10 @@ export const useDatabaseStore = defineStore('database', () => {
         const docRef = doc(db, 'productos', productId);
         await updateDoc(docRef, {
             nombre: productData.nombre,
-            valor: productData.valor
+            valor: productData.valor,
+            imagenUrl: productData.imagenUrl
         });
-     // Actualizar el array local también
+        
         const index = documents.value.findIndex(p => p.id === productId);
         if (index !== -1) {
             documents.value[index] = {
@@ -76,7 +80,6 @@ export const useDatabaseStore = defineStore('database', () => {
         throw error;
     }
 }
-
 
     return {
         documents,

@@ -49,6 +49,12 @@ const router = createRouter({
       name: 'home',
       component: () => import('../views/Home.vue'),
       beforeEnter: requireAuth
+    },
+    {
+      path: '/productForm',
+      name: 'productForm',
+      component: () => import('../components/ProductForm.vue'),
+    
     }
   ],
 })

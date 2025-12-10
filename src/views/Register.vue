@@ -1,6 +1,7 @@
 <script setup>
 import { useUserStore } from '../stores/user'
  import { RouterLink, useRouter } from 'vue-router'
+
 import { ref } from 'vue'
 
 const router = useRouter();
@@ -8,19 +9,49 @@ const userStore = useUserStore()
 
  const email = ref('')
  const password = ref('')
+const confirmPassword = ref('')
+const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
 
- const handleSubmit = async () => {
-  if (!email.value || password.value.length < 6) {
-        return alert('Por favor, ingresa tu correo electrónico y contraseña.');
-    }
+
+// Validaciones de los campos del formulario para los errores
+const errors = ref({
+  email: '',
+  password: '',
+  confirmPassword: '',
+})  
+
+const handleSubmit = async () => {
+ errors.value = {
+    email: '',
+    password: '',
+    confirmPassword: ''
+  }
+let isValid =true
+if (!email.value) {
+  errors.value.email = 'Ingresa un correo'
+  isValid = false
+} else if (!emailRegex.test(email.value)) {
+  errors.value.email = 'Correo no válido'
+  isValid = false
+}
+  if (password.value.length < 6) {
+   errors.value.password = 'La contraseñas debe tener al menos 6 caracteres'
+    isValid = false
+  }
+  if (password.value !== confirmPassword.value) {
+    errors.value.confirmPassword = 'Las contraseñas no coinciden'
+    isValid = false
+  }
+  if (!isValid) {
+    return
+  }
   await userStore.registerUser(email.value, password.value)
-   /*  router.push('/home') */
- }
+}
 </script>
 
 <template>
   <div class="flex h-screen items-center justify-center">
-   <div class="h-[600px] w-[400px] border-2 border-solid border-gray-800 px-6 py-12 lg:px-8">
+   <div class="min-h-[600px] w-[400px] border-2 border-solid border-gray-800 px-6 py-12 lg:px-8">
     <div class="sm:mx-auto sm:w-full sm:max-w-sm">
       <img class="mx-auto h-10 w-auto"
         src="https://tailwindcss.com/plus-assets/img/logos/mark.svg?color=indigo&shade=600" 
@@ -33,24 +64,29 @@ const userStore = useUserStore()
     </div>
   
     <div class="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
-      <form @submit.prevent="handleSubmit" class="space-y-6" method="POST">
+      <form @submit.prevent="handleSubmit" class="space-y-6" method="POST" novalidate>
 <!-- Email address --> 
         <div>
           <label for="email" class="block text-sm/6 font-medium text-gray-900">Email address</label>
           <div class="mt-2">
-            <input type="email"
+            <input 
+              type="email"
                name="email" 
                id="email"
                autocomplete="email"
                required="true" 
                v-model.trim="email"
+               @input="errors.email = ''"
+
                
                class="block w-full rounded-md 
                 border-0 py-1.5 text-gray-900 
                 shadow-sm ring-1 ring-inset ring-gray-500 
                 placeholder:text-gray-400 
                 focus:ring-2 focus:ring-inset focus:ring-indigo-600 
-                sm:text-sm sm:leading-6" />
+                sm:text-sm sm:leading-6" 
+              />
+              <p v-if="errors.email" class="mt-1 min-h-[20px] text-sm text-red-600">{{ errors.email }}</p>
           </div>
         </div>
  <!-- Password -->
@@ -64,9 +100,8 @@ const userStore = useUserStore()
              name="password" 
              id="password" 
              autocomplete="current-password" 
-             required="true"
-              v-model.trim="password"
-
+             v-model.trim="password"
+             @input="errors.password = ''"
               class="block w-full rounded-md 
                 border-0 py-1.5 text-gray-900 
                 shadow-sm ring-1 ring-inset ring-gray-500 
@@ -74,6 +109,31 @@ const userStore = useUserStore()
                 focus:ring-2 focus:ring-inset focus:ring-indigo-600 
                 sm:text-sm sm:leading-6" 
                />
+               <p v-if="errors.password" class="mt-1 min-h-[20px] text-sm text-red-600">{{ errors.password }}</p>
+          </div>
+        </div>
+<!-- Confirm Password -->        
+        <div>
+          <div class="flex items-center justify-between">
+            <label for="password" class="block text-sm/6 font-medium text-gray-900">Confirm Password</label>
+          </div>
+          <div class="mt-2">
+            <input 
+             type="password"
+             name="confirm-password" 
+             id="confirm-password" 
+             autocomplete="current-password" 
+              v-model.trim="confirmPassword"
+              @input="errors.confirmPassword = ''"
+
+            class="block w-full rounded-md 
+                border-0 py-1.5 text-gray-900 
+                shadow-sm ring-1 ring-inset ring-gray-500 
+                placeholder:text-gray-400 
+                focus:ring-2 focus:ring-inset focus:ring-indigo-600 
+                sm:text-sm sm:leading-6" 
+               />
+               <p v-if="errors.confirmPassword" class="mt-1 min-h-[20px] text-sm text-red-600">{{ errors.confirmPassword }}</p>
           </div>
         </div>
 

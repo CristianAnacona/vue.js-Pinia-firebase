@@ -1,29 +1,50 @@
 <script setup>
 import { useUserStore } from '../stores/user'
-import { useRouter } from 'vue-router' 
+import { useRouter } from 'vue-router'
 import { ref } from 'vue'
 
-const router = useRouter();
+const router = useRouter()
 const userStore = useUserStore()
 
 const email = ref('')
 const password = ref('')
-const loginError = ref(null) 
+
+// Validaciones de los campos del formulario para los errores
+const errors = ref({
+  email: '',
+  password: '',
+})
 
 const handleSubmit = async () => {
-    loginError.value = null; 
-    if (!email.value || password.value.length < 6) {
-        loginError.value = 'Por favor, ingresa tu correo electrónico y una contraseña de al menos 6 caracteres.';
-        return;
-    }
-    const result = await userStore.loginUser(email.value, password.value);
-    if (result) {
-        loginError.value = result;
-        email.value = '';
-        password.value = '';
-    }
+  // limpiar errores
+  errors.value = {
+    email: '',
+    password: '',
+  }
+
+  let isValid = true
+
+  if (!email.value) {
+    errors.value.email = 'Ingresa tu correo'
+    isValid = false
+  }
+
+  if (password.value.length < 6) {
+    errors.value.password = 'La contraseña debe tener al menos 6 caracteres'
+    isValid = false
+  }
+
+  if (!isValid) return
+
+  const result = await userStore.loginUser(email.value, password.value)
+
+  // error del backend (usuario o contraseña incorrectos)
+  if (result) {
+    errors.value.password = result
+  }
 }
 </script>
+
 <template>
   <div class="flex h-screen items-center justify-center">
    <div class="h-[600px] w-[400px] border-2 border-solid border-gray-800 px-6 py-12 lg:px-8">
@@ -42,19 +63,21 @@ const handleSubmit = async () => {
         <div>
           <label for="email" class="block text-sm/6 font-medium text-gray-900">Email address</label>
           <div class="mt-2">
-            <input type="email"
-               name="email" 
-               id="email"
+            <input 
+               type="email"
                autocomplete="email"
-               required="true" 
                v-model.trim="email"
-               
-               class="block w-full rounded-md 
+               @input="errors.email = ''"
+                class="block w-full rounded-md 
                 border-0 py-1.5 text-gray-900 
                 shadow-sm ring-1 ring-inset ring-gray-500 
                 placeholder:text-gray-400 
                 focus:ring-2 focus:ring-inset focus:ring-indigo-600 
-                sm:text-sm sm:leading-6" />
+                sm:text-sm sm:leading-6" 
+                />
+                <p v-if="errors.email" class="mt-1 min-h-[20px] text-sm text-red-600">
+                  {{ errors.email }}
+                </p>
           </div>
         </div>
  <!-- Password -->
@@ -68,11 +91,9 @@ const handleSubmit = async () => {
           <div class="mt-2">
             <input 
              type="password"
-             name="password" 
-             id="password" 
              autocomplete="current-password" 
-             required="true"
              v-model.trim="password"
+             @input="errors.password = ''"
 
               class="block w-full rounded-md 
                 border-0 py-1.5 text-gray-900 
@@ -81,9 +102,11 @@ const handleSubmit = async () => {
                 focus:ring-2 focus:ring-inset focus:ring-indigo-600 
                 sm:text-sm sm:leading-6" 
                />
+               <p v-if="errors.password" class="mt-1 min-h-[20px] text-sm text-red-600">
+                {{ errors.password }}
+              </p>
           </div>
-        </div>
-
+      </div>
         <div>
           <button type="submit"
             class="flex w-full justify-center 
@@ -105,9 +128,7 @@ const handleSubmit = async () => {
         </Router-link>
       </p>
 
-      <p v-if="loginError" style="color: red; text-align: center; margin-top: 15px;">
-        {{ loginError }}
-    </p>
+      
 
     <div class="relative mt-8">
       <div class="absolute inset-0 flex items-center" aria-hidden="true">
